@@ -310,21 +310,6 @@ const figureMap = {
         <polygon points="45,35 65,35 65,85 115,85 115,105 45,105" fill="#f97316"/>
       </svg>`;
     },
-  's6': () => {
-      const size = 200;
-      return `<svg width="${size+60}" height="${size*0.7}" viewBox="0 0 ${size+60} ${size*0.7}" xmlns="http://www.w3.org/2000/svg" class="matrix-svg">
-        <rect x="20" y="20" width="80" height="80" fill="#fff" stroke="#1f2937" stroke-width="2"/>
-        <line x1="60" y1="20" x2="60" y2="100" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4 3"/>
-        <line x1="20" y1="60" x2="100" y2="60" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4 3"/>
-        <line x1="40" y1="20" x2="40" y2="100" stroke="#6b7280" stroke-width="1.5" stroke-dasharray="4 3"/>
-        <text x="60" y="125" text-anchor="middle" font-size="11" fill="#6b7280" font-weight="600">FOLD THREE TIMES</text>
-        <path d="M 115 60 L 145 60" stroke="#1f2937" stroke-width="2" fill="none" marker-end="url(#arr3)"/>
-        <defs><marker id="arr3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1f2937"/></marker></defs>
-        <rect x="160" y="70" width="40" height="40" fill="#fff" stroke="#1f2937" stroke-width="2"/>
-        <circle cx="175" cy="85" r="3.5" fill="#1f2937"/>
-        <text x="180" y="125" text-anchor="middle" font-size="11" fill="#6b7280" font-weight="600">PUNCH ONE HOLE</text>
-      </svg>`;
-    },
   'n3': () => tableSvg(
       ['Company','Employees','Managers','Ratio'],
       [
