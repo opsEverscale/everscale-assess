@@ -27,6 +27,17 @@
   to = "/.netlify/functions/admin/:splat"
   status = 200
 
+# Admin SPA — every /admin/... path resolves to admin.html (client-side router)
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin/*"
+  to = "/admin.html"
+  status = 200
+
 # SPA-style fallback for the candidate shell (serves index.html for unknown paths)
 [[redirects]]
   from = "/*"

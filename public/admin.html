@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Admin · Cognitive Assessment — Everscale Group</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+<div class="container admin-container">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="eyebrow">Cognitive Screener · Admin</div>
+    <div class="brand">Everscale Group</div>
+  </div>
+
+  <!-- LOGIN SCREEN -->
+  <div id="screen-login" class="screen active">
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:14px;">Admin sign-in</div>
+      <h1 style="font-size:26px; margin-bottom:8px;">Cognitive Assessment Admin</h1>
+      <p class="muted" style="margin-bottom:22px;">
+        Enter your admin email below. We'll email you a one-time sign-in link.
+      </p>
+
+      <label for="login-email">Admin email</label>
+      <input class="input" type="email" id="login-email" placeholder="you@everscalegroup.com"
+             autocomplete="email" maxlength="120">
+
+      <div id="login-error" class="form-error" style="display:none;"></div>
+      <div id="login-success" class="form-success" style="display:none;"></div>
+
+      <div style="margin-top:20px;">
+        <button class="btn" id="btn-send-link">Send sign-in link</button>
+      </div>
+
+      <p class="muted" style="margin-top:24px; font-size:13px;">
+        Access is restricted to the CEO and Head of HR. Other emails will be rejected.
+      </p>
+    </div>
+  </div>
+
+  <!-- LIST SCREEN -->
+  <div id="screen-list" class="screen">
+    <div class="admin-header card">
+      <div>
+        <div class="eyebrow">Submissions</div>
+        <h2 style="margin:6px 0 4px;">Candidate Sessions</h2>
+        <div class="muted" style="font-size:14px;">
+          Signed in as <span id="who-email">—</span>
+          <span class="dot-sep">·</span>
+          <a href="#" id="btn-sign-out">Sign out</a>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn ghost" id="btn-refresh">Refresh</button>
+        <button class="btn" id="btn-export-csv">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="card admin-toolbar">
+      <input type="search" id="filter-search" class="input" placeholder="Search name or email…" autocomplete="off">
+      <select id="filter-band" class="input">
+        <option value="">All bands</option>
+        <option>Very Superior (130+)</option>
+        <option>Superior (120-129)</option>
+        <option>High Average (110-119)</option>
+        <option>Average (90-109)</option>
+        <option>Low Average (80-89)</option>
+        <option>Borderline (70-79)</option>
+        <option>Below Average (&lt;70)</option>
+      </select>
+      <label class="check-row">
+        <input type="checkbox" id="filter-flagged-only">
+        <span>Integrity flagged only</span>
+      </label>
+      <div class="row-count" id="row-count"></div>
+    </div>
+
+    <div class="card admin-table-card">
+      <div id="list-loading" class="muted" style="padding:18px;">Loading…</div>
+      <div id="list-empty" class="muted" style="padding:18px; display:none;">
+        No submitted sessions yet. Once a candidate completes the assessment, it'll show up here.
+      </div>
+      <table class="data-table" id="sessions-table" style="display:none;">
+        <thead>
+          <tr>
+            <th data-sort="name">Name</th>
+            <th data-sort="email">Email</th>
+            <th data-sort="submitted_at">Submitted</th>
+            <th data-sort="duration_min" class="num">Min</th>
+            <th data-sort="raw_correct" class="num">Correct</th>
+            <th data-sort="iq" class="num">IQ</th>
+            <th data-sort="band">Band</th>
+            <th data-sort="percentile" class="num">%ile</th>
+            <th data-sort="calibration" class="num">Calib.</th>
+            <th data-sort="tab_switches" class="num">Tabs</th>
+            <th data-sort="integrity_flag">Flag</th>
+          </tr>
+        </thead>
+        <tbody id="sessions-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DETAIL SCREEN -->
+  <div id="screen-detail" class="screen">
+    <div style="margin-bottom:12px;">
+      <button class="btn ghost" id="btn-back-list">← Back to list</button>
+    </div>
+
+    <div id="detail-loading" class="card muted">Loading session…</div>
+    <div id="detail-error" class="card error-card" style="display:none;"></div>
+
+    <div id="detail-body" style="display:none;">
+      <!-- candidate + score summary -->
+      <div class="card detail-summary">
+        <div class="detail-header">
+          <div>
+            <div class="eyebrow">Candidate</div>
+            <h2 id="d-name" style="margin:6px 0 2px;"></h2>
+            <div class="muted"><span id="d-email"></span></div>
+            <div class="muted" id="d-role" style="margin-top:4px; display:none;"></div>
+          </div>
+          <div id="d-flag-badge"></div>
+        </div>
+
+        <div class="score-grid">
+          <div class="score-cell"><div class="value" id="d-iq">—</div><div class="label">IQ</div></div>
+          <div class="score-cell"><div class="value" id="d-band-label" style="font-size:14px;">—</div><div class="label">Band</div></div>
+          <div class="score-cell"><div class="value" id="d-pctile">—</div><div class="label">Percentile</div></div>
+          <div class="score-cell"><div class="value" id="d-ci">—</div><div class="label">95% CI</div></div>
+          <div class="score-cell"><div class="value" id="d-raw">—</div><div class="label">Raw correct</div></div>
+          <div class="score-cell"><div class="value" id="d-weighted">—</div><div class="label">Weighted</div></div>
+          <div class="score-cell"><div class="value" id="d-duration">—</div><div class="label">Duration</div></div>
+          <div class="score-cell"><div class="value" id="d-calibration">—</div><div class="label">Calibration</div></div>
+        </div>
+      </div>
+
+      <!-- integrity flags -->
+      <div class="card">
+        <h3>Integrity Signals</h3>
+        <div class="meta-grid">
+          <div><strong>Tab switches:</strong> <span id="d-tabswitch">0</span></div>
+          <div><strong>Low-difficulty misses:</strong> <span id="d-lowmiss">0</span></div>
+          <div><strong>Started:</strong> <span id="d-started">—</span></div>
+          <div><strong>Submitted:</strong> <span id="d-submitted">—</span></div>
+        </div>
+        <ul id="d-flags" class="flags-list"></ul>
+      </div>
+
+      <!-- language-fair sub-score -->
+      <div class="card" id="d-lf-card">
+        <h3>Language-Fair Sub-Score</h3>
+        <p class="muted" style="margin-bottom:8px; font-size:13px;">
+          What the score looks like with verbal items removed — useful for ESL candidates.
+        </p>
+        <div class="meta-grid">
+          <div><strong>Language-fair IQ:</strong> <span id="d-lf-iq">—</span></div>
+          <div><strong>Band:</strong> <span id="d-lf-band">—</span></div>
+          <div><strong>Gap vs. overall:</strong> <span id="d-lf-gap">—</span></div>
+          <div><strong>Interpretation:</strong> <span id="d-lf-interp">—</span></div>
+        </div>
+      </div>
+
+      <!-- category breakdown -->
+      <div class="card">
+        <h3>Category Breakdown</h3>
+        <div id="d-categories" class="categories"></div>
+      </div>
+
+      <!-- per-item table -->
+      <div class="card">
+        <h3>Per-Item Detail (28 items)</h3>
+        <p class="muted" style="margin-bottom:10px; font-size:13px;">
+          The order, options, and correct slot reflect what the candidate actually saw.
+        </p>
+        <table class="data-table items-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>ID</th>
+              <th>Category</th>
+              <th class="num">Diff.</th>
+              <th>Prompt</th>
+              <th>Their answer</th>
+              <th>Correct answer</th>
+              <th>Result</th>
+              <th class="num">Time</th>
+              <th class="num">Conf.</th>
+            </tr>
+          </thead>
+          <tbody id="d-items-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Supabase JS for auth (browser-side magic link) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/admin.js"></script>
+</body>
+</html>
