@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Cognitive Assessment — Everscale Group</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="container">
+
+  <!-- TOPBAR (visible on all screens) -->
+  <div class="topbar">
+    <div class="eyebrow">Cognitive Screener</div>
+    <div class="brand">Everscale Group</div>
+  </div>
+
+  <!-- LOADING SCREEN — shown while we fetch /api/session -->
+  <div id="screen-loading" class="screen active">
+    <div class="card">
+      <div class="eyebrow">Loading</div>
+      <h2>Preparing your assessment…</h2>
+      <p class="muted">One moment.</p>
+    </div>
+  </div>
+
+  <!-- INVALID INVITE SCREEN -->
+  <div id="screen-invalid" class="screen">
+    <div class="card error-card">
+      <h1>Invite Not Valid</h1>
+      <p id="invalid-msg" class="muted">This invitation link can no longer be used.</p>
+      <p class="muted" style="margin-top:14px;">
+        If you believe this is a mistake, please reply to the email you received from the hiring team
+        and they will issue you a new link.
+      </p>
+    </div>
+  </div>
+
+  <!-- INTRO SCREEN -->
+  <div id="screen-intro" class="screen">
+    <div class="card hero">
+      <div class="eyebrow" style="margin-bottom:16px;">Assessment</div>
+      <h1>Cognitive Ability Assessment</h1>
+      <p class="lead">Cognitive screener grounded in psychometric best practices (Raven's APM, SHL Verify G+, Watson-Glaser, and Wonderlic).</p>
+    </div>
+
+    <div class="stats-inset">
+      <div class="stat-grid">
+        <div class="stat-box"><div class="value">28</div><div class="label">Questions</div></div>
+        <div class="stat-box"><div class="value">25</div><div class="label">Minutes</div></div>
+        <div class="stat-box"><div class="value">4+</div><div class="label">Constructs</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>What to expect</h3>
+      <ul class="intro-list">
+        <li>Pattern recognition (visual matrices)</li>
+        <li>Verbal reasoning (analogies, word relationships)</li>
+        <li>Logical &amp; spatial reasoning (syllogisms, deduction, rotation)</li>
+        <li>Numerical reasoning (data interpretation)</li>
+        <li>Situational judgment (workplace scenarios)</li>
+      </ul>
+
+      <h3 style="margin-top:26px;">Instructions</h3>
+      <ul class="intro-list">
+        <li>You have <strong>25 minutes</strong>. The test auto-submits when time runs out.</li>
+        <li>After each question you'll rate your confidence: Low, Medium, or High.</li>
+        <li>You can skip questions and return using the navigation buttons.</li>
+        <li>Copy/paste is disabled, and tab-switches are logged.</li>
+        <li>Work in a single uninterrupted session for best results.</li>
+      </ul>
+
+      <div style="margin-top:26px;">
+        <label for="candidateName">Your Name</label>
+        <input class="input" type="text" id="candidateName" placeholder="—" maxlength="80" autocomplete="name" readonly>
+      </div>
+
+      <div style="margin-top:16px;">
+        <label for="candidateEmail">Email</label>
+        <input class="input" type="email" id="candidateEmail" placeholder="—" maxlength="120" autocomplete="email" readonly>
+      </div>
+
+      <div id="intro-error" style="display:none; margin-top:12px; color:#b91c1c; font-size:14px; font-weight:600;"></div>
+
+      <div style="margin-top:24px;">
+        <button class="btn" id="btn-start">Start Test</button>
+      </div>
+
+      <div class="disclaimer" style="margin-top:26px;">
+        This is a first-round cognitive screener, not a clinical IQ assessment. Scores are estimates with a confidence interval, not diagnostic findings. A certified psychologist is required for any clinical interpretation.
+      </div>
+    </div>
+  </div>
+
+  <!-- TEST SCREEN -->
+  <div id="screen-test" class="screen no-select">
+    <div class="test-header">
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+        <div class="progress-text" id="prog-text">Question 1 of 28</div>
+      </div>
+      <div class="timer" id="timer">25:00</div>
+    </div>
+
+    <div class="card question-card">
+      <div class="q-category" id="q-category">Question</div>
+      <div class="q-prompt" id="q-prompt"></div>
+      <div class="q-figure" id="q-figure"></div>
+      <div class="choices" id="q-choices"></div>
+
+      <div class="confidence-wrap">
+        <div class="confidence-label">How confident are you in your answer?</div>
+        <div class="confidence-row" id="conf-row">
+          <button class="conf-btn" data-val="1">Low</button>
+          <button class="conf-btn" data-val="2">Medium</button>
+          <button class="conf-btn" data-val="3">High</button>
+        </div>
+        <div class="conf-labels"><span>Guessing</span><span>Moderate</span><span>Confident</span></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn secondary" id="btn-prev">← Previous</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn ghost" id="btn-skip">Skip</button>
+        <button class="btn" id="btn-next">Next →</button>
+      </div>
+    </div>
+
+    <div class="submit-bar" id="submit-bar">
+      <button class="btn submit-test" id="btn-submit">Submit Test</button>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN — minimal candidate-facing only. No IQ, no breakdown. -->
+  <div id="screen-results" class="screen">
+    <div class="card">
+      <h1>Assessment Submitted</h1>
+      <p class="muted" id="res-subtitle">Thank you for completing the cognitive ability assessment.</p>
+
+      <div class="score-hero">
+        <div class="checkmark">&check;</div>
+        <div class="label">Your assessment has been received</div>
+        <div class="headline" id="res-headline">Submitted successfully</div>
+        <div class="sub" id="res-sub">The hiring team will review your results and follow up via email.</div>
+      </div>
+
+      <div class="disclaimer">
+        Your detailed results have been delivered to the hiring team. There is nothing further you need to do —
+        you may close this window. If you have questions, please reply to the email you received with your invitation link.
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBMIT-ERROR SCREEN -->
+  <div id="screen-submit-error" class="screen">
+    <div class="card error-card">
+      <h1>Submission Failed</h1>
+      <p class="muted" id="submit-error-msg">We couldn't record your answers. Please try again.</p>
+      <div style="margin-top:20px;">
+        <button class="btn" id="btn-retry-submit">Try again</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

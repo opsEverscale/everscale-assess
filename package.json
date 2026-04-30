@@ -1,0 +1,19 @@
+{
+  "name": "everscale-prehire-iq-test",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Everscale Pre-Hire IQ Test — stage 1 Netlify + Supabase deployment",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "netlify dev",
+    "smoke": "node scripts/smoke-session.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.38.0"
+  }
+}

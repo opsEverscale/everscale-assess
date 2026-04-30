@@ -1,0 +1,35 @@
+# Netlify config — Everscale Pre-Hire IQ Test
+# Stage 1: Netlify Functions + Supabase (server-side scoring)
+
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  # Bundle with esbuild so we can `import` the figures lib from node_modules-style paths
+  node_bundler = "esbuild"
+  # Keep the slim bank JSON accessible to functions if we ever want a static fallback
+  included_files = ["netlify/functions/_lib/**"]
+
+# Friendly API paths — /api/session, /api/submit, /api/admin/*
+[[redirects]]
+  from = "/api/session"
+  to = "/.netlify/functions/session"
+  status = 200
+
+[[redirects]]
+  from = "/api/submit"
+  to = "/.netlify/functions/submit"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/*"
+  to = "/.netlify/functions/admin/:splat"
+  status = 200
+
+# SPA-style fallback for the candidate shell (serves index.html for unknown paths)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
