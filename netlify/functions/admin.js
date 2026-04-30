@@ -9,8 +9,11 @@
 // The redirect rule in netlify.toml maps /api/admin/* → /.netlify/functions/admin/:splat
 // so this single function handles every admin route.
 
+const crypto = require('crypto');
 const { supabase } = require('./_lib/supabase');
 const { requireAdmin, jsonError, jsonOk } = require('./_lib/admin-auth');
+
+const INVITE_EXPIRY_DAYS = 7;
 
 // --- helpers ------------------------------------------------------------
 
@@ -44,6 +47,9 @@ function parseRoute(rawPath) {
   }
   if (stripped === '/sessions.csv') {
     return { kind: 'csv' };
+  }
+  if (stripped === '/invite' || stripped === '/invite/') {
+    return { kind: 'invite' };
   }
   const m = stripped.match(/^\/sessions\/([0-9a-f-]{36})$/i);
   if (m) {
@@ -304,10 +310,93 @@ async function handleCsv() {
   };
 }
 
+// --- invite creation ----------------------------------------------------
+
+async function handleInvite(event, auth) {
+  // Body: { name, email, role_applied_for? }
+  let body;
+  try {
+    body = JSON.parse(event.body || '{}');
+  } catch (e) {
+    return jsonError(400, 'bad_json');
+  }
+
+  const name = String(body.name || '').trim();
+  const email = String(body.email || '').trim().toLowerCase();
+  const role = String(body.role_applied_for || '').trim();
+
+  if (name.length < 2 || name.length > 80) {
+    return jsonError(400, 'name_invalid');
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 120) {
+    return jsonError(400, 'email_invalid');
+  }
+  if (role.length > 120) {
+    return jsonError(400, 'role_too_long');
+  }
+
+  // Reject duplicates by email — table has UNIQUE on email.
+  const { data: existing, error: existsErr } = await supabase
+    .from('candidates')
+    .select('id, name, email')
+    .eq('email', email)
+    .maybeSingle();
+  if (existsErr) return jsonError(500, 'db_error', { detail: existsErr.message });
+  if (existing) {
+    return jsonError(409, 'email_already_exists', {
+      candidate_id: existing.id,
+      existing_name: existing.name
+    });
+  }
+
+  // Insert candidate, then token. If the token insert fails we roll the
+  // candidate row back so we don't leave orphans.
+  const { data: candidate, error: candErr } = await supabase
+    .from('candidates')
+    .insert({
+      name,
+      email,
+      role_applied_for: role || null,
+      invited_by: auth.email
+    })
+    .select('id')
+    .single();
+  if (candErr || !candidate) {
+    return jsonError(500, 'candidate_insert_failed', { detail: candErr?.message });
+  }
+
+  const token = 'invite-' + crypto.randomBytes(16).toString('hex');
+  const expiresAt = new Date(Date.now() + INVITE_EXPIRY_DAYS * 24 * 3600 * 1000).toISOString();
+
+  const { error: tokenErr } = await supabase
+    .from('invite_tokens')
+    .insert({
+      token,
+      candidate_id: candidate.id,
+      created_by: auth.email,
+      expires_at: expiresAt
+    });
+  if (tokenErr) {
+    // best-effort cleanup
+    await supabase.from('candidates').delete().eq('id', candidate.id);
+    return jsonError(500, 'token_insert_failed', { detail: tokenErr.message });
+  }
+
+  return jsonOk({
+    token,
+    candidate_id: candidate.id,
+    expires_at: expiresAt,
+    expiry_days: INVITE_EXPIRY_DAYS
+  });
+}
+
 // --- entrypoint ---------------------------------------------------------
 
 exports.handler = async (event) => {
-  if (event.httpMethod !== 'GET') {
+  const method = event.httpMethod;
+
+  // Only GET (read endpoints) and POST (invite creation) are allowed.
+  if (method !== 'GET' && method !== 'POST') {
     return jsonError(405, 'method_not_allowed');
   }
 
@@ -318,6 +407,15 @@ exports.handler = async (event) => {
 
   // event.path looks like /.netlify/functions/admin/sessions[/...]
   const route = parseRoute(event.path || event.rawUrl || '');
+
+  if (route.kind === 'invite') {
+    if (method !== 'POST') return jsonError(405, 'method_not_allowed');
+    return handleInvite(event, auth);
+  }
+
+  if (method !== 'GET') {
+    return jsonError(405, 'method_not_allowed');
+  }
 
   switch (route.kind) {
     case 'list':   return handleList();

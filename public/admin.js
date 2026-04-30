@@ -395,10 +395,147 @@
     });
   }
 
+  // -------- INVITE MODAL --------
+  function openInviteModal() {
+    $('invite-form-view').style.display = '';
+    $('invite-success-view').style.display = 'none';
+    $('inv-name').value = '';
+    $('inv-email').value = '';
+    $('inv-role').value = '';
+    $('invite-error').style.display = 'none';
+    $('invite-modal').style.display = 'flex';
+    setTimeout(() => $('inv-name').focus(), 50);
+  }
+  function closeInviteModal() {
+    $('invite-modal').style.display = 'none';
+  }
+
+  async function submitInvite() {
+    const name = $('inv-name').value.trim();
+    const email = $('inv-email').value.trim();
+    const role = $('inv-role').value.trim();
+    const errEl = $('invite-error');
+    errEl.style.display = 'none';
+
+    if (name.length < 2) {
+      errEl.textContent = 'Please enter the candidate\'s name.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errEl.textContent = 'Please enter a valid email address.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const btn = $('invite-submit');
+    btn.disabled = true;
+    btn.textContent = 'Creating…';
+    try {
+      const res = await authFetch('/api/admin/invite', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name, email, role_applied_for: role })
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 409 && body.error === 'email_already_exists') {
+          errEl.textContent = 'A candidate with that email already exists' +
+            (body.existing_name ? ' (' + body.existing_name + ').' : '.') +
+            ' Reuse the existing invite, or delete that record first.';
+        } else if (body.error === 'email_invalid') {
+          errEl.textContent = 'Email address is invalid.';
+        } else if (body.error === 'name_invalid') {
+          errEl.textContent = 'Candidate name must be 2-80 characters.';
+        } else {
+          errEl.textContent = 'Could not create invite: ' + (body.error || ('HTTP ' + res.status));
+        }
+        errEl.style.display = 'block';
+        return;
+      }
+
+      // success — switch to success view
+      const inviteUrl = window.location.origin + '/?invite=' + encodeURIComponent(body.token);
+      $('invite-url').textContent = inviteUrl;
+      $('invite-expiry-days').textContent = body.expiry_days || 7;
+      const expiresOn = body.expires_at
+        ? new Date(body.expires_at).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })
+        : '';
+      $('invite-summary').textContent =
+        'For ' + name + ' (' + email + ')' + (role ? ' · ' + role : '') +
+        (expiresOn ? ' · expires ' + expiresOn : '');
+      $('invite-form-view').style.display = 'none';
+      $('invite-success-view').style.display = '';
+    } catch (e) {
+      errEl.textContent = 'Network error: ' + (e.message || '');
+      errEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Create invite';
+    }
+  }
+
+  function copyInviteUrl() {
+    const url = $('invite-url').textContent;
+    if (!url) return;
+    const btn = $('invite-copy');
+    const orig = btn.textContent;
+    const done = (msg) => {
+      btn.textContent = msg;
+      setTimeout(() => { btn.textContent = orig; }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => done('Copied ✓')).catch(() => fallback());
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); done('Copied ✓'); }
+      catch (e) { done('Copy failed'); }
+      ta.remove();
+    }
+  }
+
+  function wireInviteControls() {
+    $('btn-invite-open').addEventListener('click', openInviteModal);
+    $('invite-close').addEventListener('click', closeInviteModal);
+    $('invite-cancel').addEventListener('click', closeInviteModal);
+    $('invite-submit').addEventListener('click', submitInvite);
+    $('invite-copy').addEventListener('click', copyInviteUrl);
+    $('invite-another').addEventListener('click', openInviteModal);
+    $('invite-done').addEventListener('click', () => {
+      closeInviteModal();
+      loadList(); // refresh so the new candidate row eventually appears (after they submit)
+    });
+
+    // Backdrop click closes (but click inside the card does not).
+    $('invite-modal').addEventListener('click', (e) => {
+      if (e.target === $('invite-modal')) closeInviteModal();
+    });
+    // Escape closes when modal is open.
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && $('invite-modal').style.display !== 'none') {
+        closeInviteModal();
+      } else if (e.key === 'Enter' && $('invite-modal').style.display !== 'none' && $('invite-form-view').style.display !== 'none') {
+        // Enter inside form fields submits, except when the role textarea has focus (none here, but defensive).
+        if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+          submitInvite();
+        }
+      }
+    });
+  }
+
   // -------- Bootstrap --------
   async function bootstrap() {
     wireLoginControls();
     wireListControls();
+    wireInviteControls();
 
     // 1. If the URL has a magic-link fragment, Supabase JS picks it up
     //    automatically (detectSessionInUrl). Wait briefly for it to settle.

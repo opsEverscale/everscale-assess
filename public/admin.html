@@ -57,7 +57,8 @@
       </div>
       <div class="header-actions">
         <button class="btn ghost" id="btn-refresh">Refresh</button>
-        <button class="btn" id="btn-export-csv">Export CSV</button>
+        <button class="btn ghost" id="btn-export-csv">Export CSV</button>
+        <button class="btn" id="btn-invite-open">+ Invite candidate</button>
       </div>
     </div>
 
@@ -195,6 +196,58 @@
           </thead>
           <tbody id="d-items-tbody"></tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVITE MODAL -->
+  <div id="invite-modal" class="modal-backdrop" style="display:none;" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-labelledby="invite-modal-title">
+      <button class="modal-close" id="invite-close" aria-label="Close">×</button>
+
+      <!-- form view -->
+      <div id="invite-form-view">
+        <h2 id="invite-modal-title" style="margin:0 0 6px;">Invite a candidate</h2>
+        <p class="muted" style="margin-bottom:18px; font-size:14px;">
+          Creates a candidate record and a unique sign-in link. You'll get the link to copy and email manually.
+        </p>
+
+        <label for="inv-name">Candidate name</label>
+        <input class="input" type="text" id="inv-name" maxlength="80" autocomplete="off" placeholder="Jane Doe">
+
+        <label for="inv-email" style="margin-top:14px;">Candidate email</label>
+        <input class="input" type="email" id="inv-email" maxlength="120" autocomplete="off" placeholder="jane@example.com">
+
+        <label for="inv-role" style="margin-top:14px;">Role applied for <span class="muted">(optional)</span></label>
+        <input class="input" type="text" id="inv-role" maxlength="120" autocomplete="off" placeholder="Senior Engineer">
+
+        <div id="invite-error" class="form-error" style="display:none;"></div>
+
+        <div style="margin-top:20px; display:flex; gap:10px; justify-content:flex-end;">
+          <button class="btn ghost" id="invite-cancel">Cancel</button>
+          <button class="btn" id="invite-submit">Create invite</button>
+        </div>
+      </div>
+
+      <!-- success view -->
+      <div id="invite-success-view" style="display:none;">
+        <h2 style="margin:0 0 6px;">Invite created</h2>
+        <p class="muted" style="margin-bottom:14px; font-size:14px;">
+          Copy the link below and email it to the candidate. The link expires in <span id="invite-expiry-days">7</span> days
+          and is single-use.
+        </p>
+
+        <div class="invite-url-box">
+          <code id="invite-url" class="invite-url"></code>
+          <button class="btn" id="invite-copy">Copy</button>
+        </div>
+
+        <div class="muted" id="invite-summary" style="margin-top:16px; font-size:13px;"></div>
+
+        <div style="margin-top:22px; display:flex; gap:10px; justify-content:flex-end;">
+          <button class="btn ghost" id="invite-another">Invite another</button>
+          <button class="btn" id="invite-done">Done</button>
+        </div>
       </div>
     </div>
   </div>

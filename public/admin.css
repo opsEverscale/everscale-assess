@@ -305,6 +305,70 @@
 .result-chip.wrong { background:#fee2e2; color:#b91c1c; }
 .result-chip.skip  { background:#e2e8f0; color:#475569; }
 
+/* ---------- Invite modal ---------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 29, 71, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+.modal-card {
+  background: var(--white);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 28px 28px 24px;
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+.modal-card h2 {
+  font-size: 20px;
+  color: var(--navy);
+  font-weight: 700;
+}
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: transparent;
+  border: 0;
+  font-size: 24px;
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.modal-close:hover { background: var(--light); color: var(--navy); }
+
+.invite-url-box {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 8px;
+}
+.invite-url {
+  flex: 1;
+  display: block;
+  padding: 12px 14px;
+  background: var(--light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  color: var(--navy);
+  word-break: break-all;
+  white-space: normal;
+  line-height: 1.4;
+}
+.invite-url-box .btn { flex-shrink: 0; }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .score-grid { grid-template-columns: repeat(2, 1fr); }
