@@ -26,7 +26,7 @@
   const state = {
     token: null,
     sessionId: null,
-    durationSec: 25 * 60,
+    durationSec: 24 * 60,
     startedAt: null,            // Date — from server
     items: [],                  // [{ id, prompt, choices:[{label}], figure_html? }] in display order
     candidate: { name: '', email: '', role_applied_for: '' },
@@ -37,7 +37,7 @@
     itemStartTime: 0,
     tabSwitches: 0,
     timerInterval: null,
-    secondsLeft: 25 * 60,
+    secondsLeft: 24 * 60,
     submitting: false,
     submitted: false
   };
@@ -89,7 +89,7 @@
   function hydrateSession(data) {
     state.sessionId = data.session_id;
     state.startedAt = data.started_at ? new Date(data.started_at) : new Date();
-    state.durationSec = Number(data.duration_sec) || (25 * 60);
+    state.durationSec = Number(data.duration_sec) || (24 * 60);
     state.items = Array.isArray(data.items) ? data.items : [];
     state.candidate = data.candidate || { name: '', email: '', role_applied_for: '' };
 

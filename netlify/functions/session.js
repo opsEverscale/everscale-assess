@@ -25,7 +25,7 @@ const {
 } = require('./_lib/sampling');
 
 const BANK_VERSION = process.env.BANK_VERSION || 'v8';
-const SESSION_MINUTES = Number(process.env.SESSION_MINUTES || 25);
+const SESSION_MINUTES = Number(process.env.SESSION_MINUTES || 24);
 const IP_HASH_SALT = process.env.IP_HASH_SALT || 'everscale-stage1-default-salt';
 
 const json = (statusCode, body) => ({
