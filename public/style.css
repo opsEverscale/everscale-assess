@@ -46,6 +46,23 @@ body {
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--navy);
+  display: flex;
+  align-items: center;
+}
+.brand .brand-logo {
+  display: none;
+  height: 36px;
+  width: auto;
+}
+.brand .brand-text {
+  display: inline;
+}
+/* On the intro screen, swap the wordmark for the logo image. */
+body:has(#screen-intro.active) .brand .brand-logo {
+  display: inline-block;
+}
+body:has(#screen-intro.active) .brand .brand-text {
+  display: none;
 }
 .eyebrow {
   color: var(--green);

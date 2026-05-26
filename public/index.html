@@ -10,10 +10,13 @@
 <body>
 <div class="container">
 
-  <!-- TOPBAR (visible on all screens) -->
+  <!-- TOPBAR (visible on all screens; logo shows on intro, wordmark on others) -->
   <div class="topbar">
     <div class="eyebrow">Cognitive Screener</div>
-    <div class="brand">Everscale Group</div>
+    <div class="brand">
+      <img class="brand-logo" src="/Tertiary%20Logo_blue%20png-01.png" alt="Everscale Group">
+      <span class="brand-text">Everscale Group</span>
+    </div>
   </div>
 
   <!-- LOADING SCREEN — shown while we fetch /api/session -->
@@ -89,7 +92,7 @@
       </div>
 
       <div class="disclaimer" style="margin-top:26px;">
-        This is a first-round cognitive screener, not a clinical IQ assessment. Scores are estimates with a confidence interval, not diagnostic findings. A certified psychologist is required for any clinical interpretation.
+        This is a first-round cognitive screener, not a clinical IQ assessment. Scores are estimates with a confidence interval.
       </div>
     </div>
   </div>
